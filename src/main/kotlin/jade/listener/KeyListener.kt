@@ -1,4 +1,4 @@
-package jade
+package jade.listener
 
 import org.lwjgl.glfw.GLFW.*
 

@@ -9,4 +9,9 @@ object Constants {
 		LEVEL_EDITOR_SCENE,
 		LEVEL_SCENE
 	}
+
+	enum class Shader {
+		VERTEX,
+		FRAGMENT
+	}
 }

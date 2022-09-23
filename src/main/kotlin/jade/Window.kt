@@ -6,6 +6,7 @@ import jade.scene.LevelEditorScene
 import jade.scene.LevelScene
 import jade.scene.Scene
 import values.Constants
+import utils.Time
 
 import kotlin.properties.Delegates
 
@@ -17,7 +18,6 @@ import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.system.MemoryStack.stackPush
 import org.lwjgl.system.MemoryUtil.NULL
-import utils.Time
 
 class Window private constructor() {
 	private var glfwWindow by Delegates.notNull<Long>()
@@ -141,11 +141,11 @@ class Window private constructor() {
 			when (newScene) {
 				Constants.Scene.LEVEL_EDITOR_SCENE -> {
 					currentScene = LevelEditorScene()
-					// currentScene.init()
+					currentScene.init()
 				}
 				Constants.Scene.LEVEL_SCENE -> {
 					currentScene = LevelScene()
-					// currentScene.init()
+					currentScene.init()
 				}
 			}
 		}

@@ -1,6 +1,5 @@
 package jade
 
-import kotlin.math.max
 import kotlin.properties.Delegates
 import org.lwjgl.*
 import org.lwjgl.glfw.*
@@ -9,17 +8,17 @@ import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.*
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.system.MemoryUtil.*
+import util.Time
 
 class Window private constructor() {
     private val width = 1920
     private val height = 1080
     private val title = "Mario"
     private var glfwWindow by Delegates.notNull<Long>()
-    private var r = 1f
-    private var g = 1f
-    private var b = 1f
-    private var a = 1f
-    private var fadeToBlack = false
+    var r = 1f
+    var g = 1f
+    var b = 1f
+    var a = 1f
 
     fun run() {
         println("Hello LWJGL ${Version.getVersion()}!")
@@ -72,12 +71,18 @@ class Window private constructor() {
     }
 
     private fun loop() {
+        var beginTime = Time.getTime()
+        var endTime: Float
+        var dt = -1f
+
         // This line is critical for LWJGL's interoperation with GLFW's
         // OpenGL context, or any context that is managed externally.
         // LWJGL detects the context that is current in the current thread,
         // creates the GLCapabilities instance and makes the OpenGL
         // bindings available for use.
         GL.createCapabilities()
+
+        changeScene(0)
 
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
@@ -87,14 +92,8 @@ class Window private constructor() {
 
             glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT) // clear the framebuffer
 
-            if (fadeToBlack) {
-                r = max(r - 0.01f, 0f)
-                g = max(g - 0.01f, 0f)
-                b = max(b - 0.01f, 0f)
-            }
-
-            if (KeyListener.isKeyPressed(GLFW_KEY_SPACE)) {
-                fadeToBlack = true
+            if (dt >= 0) {
+                currentScene!!.update(dt)
             }
 
             glfwSwapBuffers(glfwWindow) // swap the color buffers
@@ -103,11 +102,30 @@ class Window private constructor() {
             // invoked during this call.
             glfwPollEvents()
 
+            endTime = Time.getTime()
+            dt = endTime - beginTime
+            beginTime = endTime
         }
     }
 
     companion object {
         private var window: Window? = null
+        private var currentScene: Scene? = null
+
+        fun changeScene(newScene: Int) {
+            when (newScene) {
+                0 -> {
+                    currentScene = LevelEditorScene()
+                    //currentScene.init()
+                }
+
+                1 -> {
+                    currentScene = LevelScene()
+                }
+
+                else -> assert(false) { "Unknown scene '$newScene'" }
+            }
+        }
 
         fun get(): Window {
             if (window == null) window = Window()

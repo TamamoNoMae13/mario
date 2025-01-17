@@ -1,8 +1,10 @@
 package jade
 
+import kotlin.math.max
 import kotlin.properties.Delegates
 import org.lwjgl.*
 import org.lwjgl.glfw.*
+import org.lwjgl.glfw.Callbacks.*
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.*
 import org.lwjgl.opengl.GL11.*
@@ -13,12 +15,25 @@ class Window private constructor() {
     private val height = 1080
     private val title = "Mario"
     private var glfwWindow by Delegates.notNull<Long>()
+    private var r = 1f
+    private var g = 1f
+    private var b = 1f
+    private var a = 1f
+    private var fadeToBlack = false
 
     fun run() {
         println("Hello LWJGL ${Version.getVersion()}!")
 
         init()
         loop()
+
+        // Free the window callbacks and destroy the window
+        glfwFreeCallbacks(glfwWindow)
+        glfwDestroyWindow(glfwWindow)
+
+        // Terminate GLFW and free the error callback
+        glfwTerminate()
+        glfwSetErrorCallback(null)!!.free()
     }
 
     private fun init() {
@@ -41,6 +56,12 @@ class Window private constructor() {
         glfwWindow = glfwCreateWindow(width, height, title, NULL, NULL)
         if (glfwWindow == NULL) throw RuntimeException("Failed to create the GLFW window")
 
+        glfwSetCursorPosCallback(glfwWindow, MouseListener::mousePosCallback)
+        glfwSetMouseButtonCallback(glfwWindow, MouseListener::mouseButtonCallback)
+        glfwSetScrollCallback(glfwWindow, MouseListener::mouseScrollCallback)
+        // Setup a key callback. It will be called every time a key is pressed, repeated or released.
+        glfwSetKeyCallback(glfwWindow, KeyListener::keyCallback)
+
         // Make the OpenGL context current
         glfwMakeContextCurrent(glfwWindow)
         // Enable v-sync
@@ -58,13 +79,23 @@ class Window private constructor() {
         // bindings available for use.
         GL.createCapabilities()
 
-        // Set the clear color
-        glClearColor(1f, 1f, 1f, 1f)
-
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
         while (!glfwWindowShouldClose(glfwWindow)) {
+            // Set the clear color
+            glClearColor(r, g, b, a)
+
             glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT) // clear the framebuffer
+
+            if (fadeToBlack) {
+                r = max(r - 0.01f, 0f)
+                g = max(g - 0.01f, 0f)
+                b = max(b - 0.01f, 0f)
+            }
+
+            if (KeyListener.isKeyPressed(GLFW_KEY_SPACE)) {
+                fadeToBlack = true
+            }
 
             glfwSwapBuffers(glfwWindow) // swap the color buffers
 

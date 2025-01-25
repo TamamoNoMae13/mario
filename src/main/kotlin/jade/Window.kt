@@ -1,5 +1,6 @@
 package jade
 
+import java.nio.*
 import kotlin.properties.Delegates
 import org.lwjgl.*
 import org.lwjgl.glfw.*
@@ -7,12 +8,14 @@ import org.lwjgl.glfw.Callbacks.*
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.*
 import org.lwjgl.opengl.GL11.*
+import org.lwjgl.system.*
+import org.lwjgl.system.MemoryStack.*
 import org.lwjgl.system.MemoryUtil.*
 import util.Time
 
 class Window private constructor() {
-    private val width = 1920
-    private val height = 1080
+    private val width = 1280
+    private val height = 720
     private val title = "Mario"
     private var glfwWindow by Delegates.notNull<Long>()
     var r = 1f
@@ -49,7 +52,7 @@ class Window private constructor() {
         glfwDefaultWindowHints() // optional, the current window hints are already the default
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE) // the window will stay hidden after creation
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE) // the window will be resizable
-        glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE)
+        glfwWindowHint(GLFW_MAXIMIZED, GLFW_FALSE)
 
         // Create the window
         glfwWindow = glfwCreateWindow(width, height, title, NULL, NULL)
